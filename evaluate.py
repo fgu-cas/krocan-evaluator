@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 import sys, os, csv, re, math
 from PyQt4.QtGui import QApplication, QDialog, QFileDialog, QMessageBox
 from ui_krocan import Ui_Krocan
@@ -22,7 +22,7 @@ def processFile(track):
 
   distance = 0
   for frame_pair in zip(frames, frames[1:]):
-    distance += math.sqrt(float(frame_pair[0][2])**2 + float(frame_pair[1][2])**2)
+    distance += math.hypot(float(frame_pair[0][2]), float(frame_pair[1][2]))
   # distance *= cm_per_px
 
   max_time_avoided = 0
@@ -73,7 +73,7 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
 
   def addButtonClicked(self, _):
     files = QFileDialog.getOpenFileNames(self, "Open tracks", "", "Logs (*.log)")
-    if (files.count() is not 0):
+    if (len(files) is not 0):
       if ('/' not in self.fileList.item(0).text()):
         self.fileList.clear()
         self.hasFiles = True
@@ -92,7 +92,7 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
     if self.hasFiles:
       files = []
       for i in range(0, self.fileList.count()):
-        files.append(unicode(self.fileList.item(i).text()))
+        files.append(self.fileList.item(i).text())
       # files.sort(key= lambda filename: "_".join(filename.split("_")[:-1]))
       output_filename = QFileDialog.getSaveFileName(self, "Save .csv", "", "CSV files (*.csv)")
       if output_filename[-4:] != ".csv":
