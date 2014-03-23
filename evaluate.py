@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys, os, csv, re, math
+import matplotlib.pyplot as plt
 from PyQt4.QtGui import QApplication, QDialog, QFileDialog, QMessageBox
 from ui_krocan import Ui_Krocan
 
@@ -20,6 +21,9 @@ def processFile(track):
         tmp = re.findall('ArenaDiameter_m.0 \(( [0-9.]+ )\)', line)
         if tmp:
           params["diameter"] = float(tmp[0])
+        tmp = re.findall('ShockParameters.0 \( [0-9.]+ [0-9.]+ [0-9.]+ [0-9.]+ ([0-9.]+) \)', line)
+        if tmp:
+          params["shock_radius"] = float(tmp[0])
   return (frames, params)
 
 def analyseTrack(frames, params):
@@ -77,6 +81,37 @@ def analyseTrack(frames, params):
   
   return [ entrances, round(distance, 2), max_time_avoided, time_first_entrance, shocks, center_to_periphery ]
 
+def renderGraphs(tracks, params, filename):
+
+  arena_frame = plt.subplot2grid((1,2), (0,0))
+  arena_frame.set_title("Rat track [Arena frame]")
+  arena_frame.set_xlim([params["arena_x"]-params["diameter"]/2,params["arena_x"]+params["diameter"]/2])
+  arena_frame.set_ylim([params["arena_y"]-params["diameter"]/2,params["arena_y"]+params["diameter"]/2])
+  arena_frame.set_aspect('equal', adjustable='box')
+  arena_frame.axis('off')
+  arena_frame.add_artist(plt.Circle((params["arena_x"],params["arena_y"]),params["diameter"]/2,color='r',fill=False))
+  arena_frame.plot([float(f[2]) for f in tracks[0] if f[2] is not '0'], [float(f[3]) for f in tracks[0] if f[3] is not '0'])
+
+  xvals = []
+  yvals = []
+  for i in range(min(len(tracks[0]), len(tracks[1]))):
+    # god forgive me
+    if not ((tracks[0][i][2] is '0' and tracks[0][i][3] is '0') or (tracks[1][i][2] is '0' and tracks[1][i][3] is '0')):
+      xvals.append(float(tracks[0][i][2]) - float(tracks[1][i][2]))
+      yvals.append(float(tracks[0][i][3]) - float(tracks[1][i][3]))
+
+  robot_frame = plt.subplot2grid((1,2), (0,1))
+  robot_frame.set_title("Rat track [Robot frame]")
+  robot_frame.set_xlim(-params["diameter"], params["diameter"])
+  robot_frame.set_ylim(-params["diameter"], params["diameter"])
+  robot_frame.set_aspect('equal', adjustable='box')
+  robot_frame.axis('off')
+  robot_frame.add_artist(plt.Circle((0, 0), params["shock_radius"],color='y',fill=False))
+  robot_frame.plot(xvals, yvals) 
+
+  # histogram = plt.subplot2grid((2,2), (1,0), colspan=2)
+
+  plt.savefig(filename)
 
 class KrocanEvaluator(QDialog, Ui_Krocan):
   
@@ -115,16 +150,18 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
       for i in range(0, self.fileList.count()):
         files.append(self.fileList.item(i).text())
       # files.sort(key= lambda filename: "_".join(filename.split("_")[:-1]))
-      output_filename = QFileDialog.getSaveFileName(self, "Save .csv", "", "CSV files (*.csv)")
-      if output_filename[-4:] != ".csv":
-        output_filename += ".csv"
-      with open(output_filename, 'w') as f:
+      output_dir = QFileDialog.getExistingDirectory(self, "Output directory")
+      with open(output_dir+'/tracks.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
         for track in files:
           writer.writerow([os.path.basename(track)] + analyseTrack(*processFile(track)))
+      for track_pair in zip(files[::2], files[1::2]):
+        rat_frames, params = processFile(track_pair[0])
+        robot_frames, _ = processFile(track_pair[1])
+        renderGraphs((rat_frames, robot_frames), params, track_pair[0]+'.png')
       message = QMessageBox()
-      message.setText("Processing successful!\nSaved into \"%s\"" % output_filename)
+      message.setText("Processing successful!\nSaved into \"%s\"" % output_dir)
       message.exec_()
 
 def main():
