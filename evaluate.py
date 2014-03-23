@@ -72,7 +72,7 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
     self.show()
 
   def addButtonClicked(self, _):
-    files = QFileDialog.getOpenFileNames(self, "Open tracks", "", "Logs (*.log)")
+    files = QFileDialog.getOpenFileNames(self, "Open tracks", "", "Logs (*.dat)")
     if (len(files) is not 0):
       if ('/' not in self.fileList.item(0).text()):
         self.fileList.clear()
