@@ -23,6 +23,7 @@ def processFile(track):
   return (frames, params)
 
 def analyseTrack(frames, params):
+  frames = [f for f in frames if f[2] is not '0' and f[3] is not '0']
   entrances = 0
   outside = True
   for frame in frames:
