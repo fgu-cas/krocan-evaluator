@@ -5,6 +5,7 @@ from ui_krocan import Ui_Krocan
 
 def processFile(track):
   frames = []
+  params = {}
   with open(track, 'r') as f:
     for line in f:
       if not re.match('^[ ]*(\%|//)', line):
@@ -12,14 +13,16 @@ def processFile(track):
       else:
         tmp = re.findall('%ArenaCenterXY.0 \( ([0-9.]+) [0-9.]+ \)', line)
         if tmp:
-          arena_x = float(tmp[0])
+          params["arena_x"] = float(tmp[0])
         tmp = re.findall('%ArenaCenterXY.0 \( [0-9.]+ ([0-9.]+) \)', line)
         if tmp:
-          arena_y = float(tmp[0])
+          params["arena_y"] = float(tmp[0])
         tmp = re.findall('ArenaDiameter_m.0 \(( [0-9.]+ )\)', line)
         if tmp:
-          diameter = float(tmp[0])
+          params["diameter"] = float(tmp[0])
+  return (frames, params)
 
+def analyseTrack(frames, params):
   entrances = 0
   outside = True
   for frame in frames:
@@ -65,9 +68,9 @@ def processFile(track):
       shocking = False
 
   frames_in_centre = 0
-  inside = (diameter/2)/math.sqrt(2)
+  inside = (params["diameter"]/2)/math.sqrt(2)
   for frame in frames:
-    if math.hypot(float(frame[2])-arena_x, float(frame[3])-arena_y) < inside:
+    if math.hypot(float(frame[2])-params["arena_x"], float(frame[3])-params["arena_y"]) < inside:
       frames_in_centre+=1
   center_to_periphery = round(frames_in_centre/len(frames), 3)
   
@@ -118,7 +121,7 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
         writer = csv.writer(f)
         writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
         for track in files:
-          writer.writerow([os.path.basename(track)] + processFile(track))
+          writer.writerow([os.path.basename(track)] + analyseTrack(*processFile(track)))
       message = QMessageBox()
       message.setText("Processing successful!\nSaved into \"%s\"" % output_filename)
       message.exec_()
