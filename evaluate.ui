@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>580</width>
+    <width>666</width>
     <height>370</height>
    </rect>
   </property>
@@ -54,6 +54,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="processButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Process</string>
        </property>

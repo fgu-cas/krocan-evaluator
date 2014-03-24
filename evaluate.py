@@ -119,7 +119,7 @@ def renderGraphs(tracks, params, filename):
 
 class KrocanEvaluator(QDialog, Ui_Krocan):
   
-  hasFiles = False
+  files = []
 
   def __init__(self):
     QDialog.__init__(self)
@@ -132,41 +132,45 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
     self.show()
 
   def addButtonClicked(self, _):
-    files = QFileDialog.getOpenFileNames(self, "Open tracks", "", "Logs (*.dat)")
-    if (len(files) is not 0):
-      if ('/' not in self.fileList.item(0).text()):
-        self.fileList.clear()
-        self.hasFiles = True
-      if self.fileList.currentRow() is not -1:
-        self.fileList.insertItems(self.fileList.currentRow()+1, files)
-      else:
-        self.fileList.addItems(files)
+    selected_files = QFileDialog.getOpenFileNames(self, "Open tracks", "", "Logs (*.dat)")
+    row = self.fileList.currentRow()
+    if row is not -1:
+      self.files[row+1:row+1] = selected_files
+    else:
+      self.files += selected_files
+    self.updateUI()
 
   def removeButtonClicked(self, _):
-    if self.hasFiles:
-      self.fileList.takeItem(self.fileList.row(self.fileList.currentItem()))
+    row = self.fileList.currentRow()
+    if row is not -1:
+      self.files.pop(row)
+    self.updateUI()
 
   def processButtonClicked(self, _):
-    if not self.hasFiles:
-      self.addButtonClicked(_)
-    if self.hasFiles:
-      files = []
-      for i in range(0, self.fileList.count()):
-        files.append(self.fileList.item(i).text())
-      # files.sort(key= lambda filename: "_".join(filename.split("_")[:-1]))
-      output_dir = QFileDialog.getExistingDirectory(self, "Output directory")
-      with open(output_dir+'/tracks.csv', 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
-        for track in files:
-          writer.writerow([os.path.basename(track)] + analyseTrack(*processFile(track)))
-      for track_pair in zip(files[::2], files[1::2]):
-        rat_frames, params = processFile(track_pair[0])
-        robot_frames, _ = processFile(track_pair[1])
-        renderGraphs((rat_frames, robot_frames), params, track_pair[0]+'.png')
-      message = QMessageBox()
-      message.setText("Processing successful!\nSaved into \"%s\"" % output_dir)
-      message.exec_()
+    output_dir = QFileDialog.getExistingDirectory(self, "Output directory")
+    with open(output_dir+'/tracks.csv', 'w') as f:
+      writer = csv.writer(f)
+      writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
+      for track in self.files:
+        writer.writerow([os.path.basename(track)] + analyseTrack(*processFile(track)))
+    for track_pair in zip(self.files[::2], self.files[1::2]):
+      rat_frames, params = processFile(track_pair[0])
+      robot_frames, _ = processFile(track_pair[1])
+      renderGraphs((rat_frames, robot_frames), params, track_pair[0]+'.png')
+    message = QMessageBox()
+    message.setText("Processing successful!\nSaved into \"%s\"" % output_dir)
+    message.exec_()
+
+  def updateUI(self):
+    if len(self.files) > 0 and len(self.files) % 2 == 0:
+      self.processButton.setEnabled(True)
+    else:
+      self.processButton.setEnabled(False)
+    self.fileList.clear()
+    rat = True
+    for file in self.files:
+      self.fileList.addItem("[%s] %s" % ("RAT" if rat else "ROB", file))
+      rat = not rat
 
 def main():
   app = QApplication(sys.argv)
