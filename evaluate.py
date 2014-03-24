@@ -24,6 +24,10 @@ def processFile(track):
         tmp = re.findall('ShockParameters.0 \( [0-9.]+ [0-9.]+ [0-9.]+ [0-9.]+ ([0-9.]+) \)', line)
         if tmp:
           params["shock_radius"] = float(tmp[0])
+        tmp = re.findall('TrackerResolution_PixPerCM.0 \( ([0-9.]+) \)', line)
+        if tmp:
+          params["pix_per_cm"] = float(tmp[0])
+#todo: add a general solution
   return (frames, params)
 
 def analyseTrack(frames, params):
@@ -39,9 +43,9 @@ def analyseTrack(frames, params):
       outside = True
 
   distance = 0
-  for frame_pair in zip(frames, frames[1:]):
-    distance += math.hypot(float(frame_pair[0][2]), float(frame_pair[1][2]))
-  # distance *= cm_per_px
+  for frame_pair in zip(frames[::5], frames[5::5]):
+    distance += math.hypot(float(frame_pair[0][2])-float(frame_pair[1][2]), float(frame_pair[0][3])-float(frame_pair[1][3]))
+  distance /= params["pix_per_cm"]
 
   max_time_avoided = 0
   outside = True
