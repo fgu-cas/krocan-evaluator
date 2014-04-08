@@ -153,11 +153,12 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
       writer = csv.writer(f)
       writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
       for track in self.files:
-        writer.writerow([os.path.basename(track)] + analyseTrack(*processFile(track)))
+        writer.writerow([os.path.basename(str(track))] + analyseTrack(*processFile(track)))
     for track_pair in zip(self.files[::2], self.files[1::2]):
       rat_frames, params = processFile(track_pair[0])
       robot_frames, _ = processFile(track_pair[1])
-      renderGraphs((rat_frames, robot_frames), params, track_pair[0]+'.png')
+      output_filename = str(output_dir)+'/'+os.path.basename(str(track_pair[0]))+'.png'
+      renderGraphs((rat_frames, robot_frames), params, output_filename)
     message = QMessageBox()
     message.setText("Processing successful!\nSaved into \"%s\"" % output_dir)
     message.exec_()
