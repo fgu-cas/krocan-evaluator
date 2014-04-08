@@ -148,20 +148,24 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
     self.updateUI()
 
   def processButtonClicked(self, _):
-    output_dir = QFileDialog.getExistingDirectory(self, "Output directory")
-    with open(output_dir+'/tracks.csv', 'w') as f:
-      writer = csv.writer(f)
-      writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
-      for track in self.files:
-        writer.writerow([os.path.basename(str(track))] + analyseTrack(*processFile(track)))
-    for track_pair in zip(self.files[::2], self.files[1::2]):
-      rat_frames, params = processFile(track_pair[0])
-      robot_frames, _ = processFile(track_pair[1])
-      basename = ".".join(os.path.basename(str(track_pair[0])).split('.')[:-1])
-      output_filename = str(output_dir)+'/'+basename+'.png'
-      renderGraphs((rat_frames, robot_frames), params, output_filename)
     message = QMessageBox()
-    message.setText("Processing successful!\nSaved into \"%s\"" % output_dir)
+    try:
+      output_dir = QFileDialog.getExistingDirectory(self, "Output directory")
+      with open(output_dir+'/tracks.csv', 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
+        for track in self.files:
+          writer.writerow([os.path.basename(str(track))] + analyseTrack(*processFile(track)))
+      for track_pair in zip(self.files[::2], self.files[1::2]):
+        rat_frames, params = processFile(track_pair[0])
+        robot_frames, _ = processFile(track_pair[1])
+        basename = ".".join(os.path.basename(str(track_pair[0])).split('.')[:-1])
+        output_filename = str(output_dir)+'/'+basename+'.png'
+        renderGraphs((rat_frames, robot_frames), params, output_filename)
+    except:
+      message.setText("Error, processing failed!\n%s | %s" % (sys.exc_info()[0],sys.exc_info()[1]))
+    else:
+      message.setText("Processing successful!\nSaved into \"%s\"" % output_dir)
     message.exec_()
 
   def updateUI(self):
