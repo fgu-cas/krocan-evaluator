@@ -90,8 +90,8 @@ def renderGraphs(tracks, params, filename):
 
   arena_frame = plt.subplot2grid((1,2), (0,0))
   arena_frame.set_title("Rat track [Arena frame]")
-  arena_frame.set_xlim([params["arena_x"]-params["diameter"]/2,params["arena_x"]+params["diameter"]/2])
-  arena_frame.set_ylim([params["arena_y"]-params["diameter"]/2,params["arena_y"]+params["diameter"]/2])
+  arena_frame.set_xlim([params["arena_x"]-params["diameter"]/2-5,params["arena_x"]+params["diameter"]/2+5])
+  arena_frame.set_ylim([params["arena_y"]-params["diameter"]/2-5,params["arena_y"]+params["diameter"]/2+5])
   arena_frame.set_aspect('equal', adjustable='box')
   arena_frame.axis('off')
   arena_frame.add_artist(plt.Circle((params["arena_x"],params["arena_y"]),params["diameter"]/2,color='r',fill=False))
