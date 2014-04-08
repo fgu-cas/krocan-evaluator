@@ -28,6 +28,7 @@ def processFile(track):
         if tmp:
           params["pix_per_cm"] = float(tmp[0])
 #todo: add a general solution
+  params["diameter"] *= 100*params["pix_per_cm"]
   return (frames, params)
 
 def analyseTrack(frames, params):
