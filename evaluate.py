@@ -157,7 +157,8 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
     for track_pair in zip(self.files[::2], self.files[1::2]):
       rat_frames, params = processFile(track_pair[0])
       robot_frames, _ = processFile(track_pair[1])
-      output_filename = str(output_dir)+'/'+os.path.basename(str(track_pair[0]))+'.png'
+      basename = ".".join(os.path.basename(str(track_pair[0])).split('.')[:-1])
+      output_filename = str(output_dir)+'/'+basename+'.png'
       renderGraphs((rat_frames, robot_frames), params, output_filename)
     message = QMessageBox()
     message.setText("Processing successful!\nSaved into \"%s\"" % output_dir)
