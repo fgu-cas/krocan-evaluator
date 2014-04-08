@@ -21,7 +21,7 @@ def processFile(track):
         tmp = re.findall('ArenaDiameter_m.0 \(( [0-9.]+ )\)', line)
         if tmp:
           params["diameter"] = float(tmp[0])
-        tmp = re.findall('ShockParameters.0 \( [0-9.]+ [0-9.]+ [0-9.]+ [0-9.]+ ([0-9.]+) \)', line)
+        tmp = re.findall('ReinforcedSector.0 \( ([0-9.]+) \)', line)
         if tmp:
           params["shock_radius"] = float(tmp[0])
         tmp = re.findall('TrackerResolution_PixPerCM.0 \( ([0-9.]+) \)', line)
