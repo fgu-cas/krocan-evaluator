@@ -194,19 +194,21 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
         self.processButton.setEnabled(True)
       else:
         self.processButton.setEnabled(False)
-      self.fileList.clear()
-      for file in self.files:
-        self.fileList.addItem("[---] %s" % file)
+      if len(self.files) > 0:
+        self.fileList.clear()
+        for file in self.files:
+          self.fileList.addItem("[---] %s" % file)
     else:
       if len(self.files) > 0 and len(self.files) % 2 == 0:
         self.processButton.setEnabled(True)
       else:
         self.processButton.setEnabled(False)
-      self.fileList.clear()
-      rat = True
-      for file in self.files:
-        self.fileList.addItem("[%s] %s" % ("RAT" if rat else "ROB", file))
-        rat = not rat
+      if len(self.files) > 0:
+        self.fileList.clear()
+        rat = True
+        for file in self.files:
+          self.fileList.addItem("[%s] %s" % ("RAT" if rat else "ROB", file))
+          rat = not rat
 
 def main():
   app = QApplication(sys.argv)
