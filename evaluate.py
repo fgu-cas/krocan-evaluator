@@ -86,7 +86,7 @@ def analyseTrack(frames, params):
   
   return [ entrances, round(distance, 2), max_time_avoided, time_first_entrance, shocks, center_to_periphery ]
 
-def renderGraphs(tracks, params, filename):
+def renderGraphs_pair(tracks, params, filename):
 
   arena_frame = plt.subplot2grid((1,2), (0,0))
   arena_frame.set_title("Rat track [Arena frame]")
@@ -118,6 +118,18 @@ def renderGraphs(tracks, params, filename):
 
   plt.savefig(filename)
 
+def renderGraph (frames, params, filename):
+  fig, ax = plt.subplots()
+  ax.set_title("Track [Arena frame]")
+  ax.set_xlim([params["arena_x"]-params["diameter"]/2-5,params["arena_x"]+params["diameter"]/2+5])
+  ax.set_ylim([params["arena_y"]-params["diameter"]/2-5,params["arena_y"]+params["diameter"]/2+5])
+  ax.set_aspect('equal', adjustable='box')
+  ax.axis('off')
+  ax.add_artist(plt.Circle((params["arena_x"],params["arena_y"]),params["diameter"]/2,color='r',fill=False))
+  ax.plot([float(f[2]) for f in frames if f[2] is not '0'], [float(f[3]) for f in frames if f[3] is not '0'])
+
+  plt.savefig(filename)
+
 class KrocanEvaluator(QDialog, Ui_Krocan):
   
   files = []
@@ -129,6 +141,7 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
     self.addButton.clicked.connect(self.addButtonClicked)
     self.removeButton.clicked.connect(self.removeButtonClicked)
     self.processButton.clicked.connect(self.processButtonClicked)
+    self.singleRadio.toggled.connect(self.updateUI)
 
     self.show()
 
@@ -156,12 +169,19 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
         writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
         for track in self.files:
           writer.writerow([os.path.basename(str(track))] + analyseTrack(*processFile(track)))
-      for track_pair in zip(self.files[::2], self.files[1::2]):
-        rat_frames, params = processFile(track_pair[0])
-        robot_frames, _ = processFile(track_pair[1])
-        basename = ".".join(os.path.basename(str(track_pair[0])).split('.')[:-1])
-        output_filename = str(output_dir)+'/'+basename+'.png'
-        renderGraphs((rat_frames, robot_frames), params, output_filename)
+      if self.singleRadio.isChecked():
+        for track in self.files:
+          basename = ".".join(os.path.basename(str(track)).split('.')[:-1])
+          output_filename = str(output_dir)+'/'+basename+'.png'
+          frames, params = processFile(track)
+          renderGraph(frames, params, output_filename)
+      else:
+        for track_pair in zip(self.files[::2], self.files[1::2]):
+          rat_frames, params = processFile(track_pair[0])
+          robot_frames, _ = processFile(track_pair[1])
+          basename = ".".join(os.path.basename(str(track_pair[0])).split('.')[:-1])
+          output_filename = str(output_dir)+'/'+basename+'.png'
+          renderGraphs_pair((rat_frames, robot_frames), params, output_filename)
     except:
       message.setText("Error, processing failed!\n%s | %s" % (sys.exc_info()[0],sys.exc_info()[1]))
     else:
@@ -169,15 +189,24 @@ class KrocanEvaluator(QDialog, Ui_Krocan):
     message.exec_()
 
   def updateUI(self):
-    if len(self.files) > 0 and len(self.files) % 2 == 0:
-      self.processButton.setEnabled(True)
+    if self.singleRadio.isChecked():
+      if len(self.files) > 0:
+        self.processButton.setEnabled(True)
+      else:
+        self.processButton.setEnabled(False)
+      self.fileList.clear()
+      for file in self.files:
+        self.fileList.addItem("[---] %s" % file)
     else:
-      self.processButton.setEnabled(False)
-    self.fileList.clear()
-    rat = True
-    for file in self.files:
-      self.fileList.addItem("[%s] %s" % ("RAT" if rat else "ROB", file))
-      rat = not rat
+      if len(self.files) > 0 and len(self.files) % 2 == 0:
+        self.processButton.setEnabled(True)
+      else:
+        self.processButton.setEnabled(False)
+      self.fileList.clear()
+      rat = True
+      for file in self.files:
+        self.fileList.addItem("[%s] %s" % ("RAT" if rat else "ROB", file))
+        rat = not rat
 
 def main():
   app = QApplication(sys.argv)

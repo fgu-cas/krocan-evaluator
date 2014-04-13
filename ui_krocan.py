@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'evaluate.ui'
 #
-# Created: Mon Mar 24 19:44:27 2014
-#      by: PyQt4 UI code generator 4.10.3
+# Created: Sun Apr 13 13:14:42 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -44,6 +44,16 @@ class Ui_Krocan(object):
         self.verticalLayout.addWidget(self.removeButton)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
+        self.verticalLayout_2 = QtGui.QVBoxLayout()
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.singleRadio = QtGui.QRadioButton(Krocan)
+        self.singleRadio.setObjectName(_fromUtf8("singleRadio"))
+        self.verticalLayout_2.addWidget(self.singleRadio)
+        self.ratbotRadio = QtGui.QRadioButton(Krocan)
+        self.ratbotRadio.setChecked(True)
+        self.ratbotRadio.setObjectName(_fromUtf8("ratbotRadio"))
+        self.verticalLayout_2.addWidget(self.ratbotRadio)
+        self.verticalLayout.addLayout(self.verticalLayout_2)
         self.processButton = QtGui.QPushButton(Krocan)
         self.processButton.setEnabled(False)
         self.processButton.setObjectName(_fromUtf8("processButton"))
@@ -62,5 +72,7 @@ class Ui_Krocan(object):
         self.fileList.setSortingEnabled(__sortingEnabled)
         self.addButton.setText(_translate("Krocan", "Add files", None))
         self.removeButton.setText(_translate("Krocan", "Remove files", None))
+        self.singleRadio.setText(_translate("Krocan", "Single mode", None))
+        self.ratbotRadio.setText(_translate("Krocan", "Rat/robot mode", None))
         self.processButton.setText(_translate("Krocan", "Process", None))
 

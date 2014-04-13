@@ -53,6 +53,27 @@
       </spacer>
      </item>
      <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QRadioButton" name="singleRadio">
+         <property name="text">
+          <string>Single mode</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="ratbotRadio">
+         <property name="text">
+          <string>Rat/robot mode</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <widget class="QPushButton" name="processButton">
        <property name="enabled">
         <bool>false</bool>
