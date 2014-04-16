@@ -35,8 +35,6 @@ nosetests.xml
 .project
 .pydevproject
 
-ui_*.py
-
 *.csv
 *.png
 *.dat
