@@ -26,6 +26,13 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QPushButton" name="addDirButton">
+       <property name="text">
+        <string>Add directory</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="addButton">
        <property name="text">
         <string>Add files</string>
@@ -33,9 +40,23 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="removeButton">
        <property name="text">
         <string>Remove files</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="clearButton">
+       <property name="text">
+        <string>Clear list</string>
        </property>
       </widget>
      </item>

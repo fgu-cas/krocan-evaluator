@@ -138,12 +138,21 @@ class KrocanEvaluator(QDialog, Ui_Evaluator):
     QDialog.__init__(self)
     self.setupUi(self)
 
+    self.addDirButton.clicked.connect(self.addDirButtonClicked)
     self.addButton.clicked.connect(self.addButtonClicked)
     self.removeButton.clicked.connect(self.removeButtonClicked)
+    self.clearButton.clicked.connect(self.clearButtonClicked)
     self.processButton.clicked.connect(self.processButtonClicked)
     self.singleRadio.toggled.connect(self.updateUI)
 
     self.show()
+
+  def addDirButtonClicked(self, _):
+    directory = QFileDialog.getExistingDirectory(self)
+    logs = [directory+'/'+x for x in os.listdir(directory) if x[-4:] == ".dat"]
+    logs = sorted(logs, key=os.path.getmtime)
+    self.files += logs
+    self.updateUI()
 
   def addButtonClicked(self, _):
     selected_files = QFileDialog.getOpenFileNames(self, "Open tracks", "", "Logs (*.dat)")
@@ -158,6 +167,10 @@ class KrocanEvaluator(QDialog, Ui_Evaluator):
     row = self.fileList.currentRow()
     if row is not -1:
       self.files.pop(row)
+    self.updateUI()
+
+  def clearButtonClicked(self, _):
+    self.files.clear()
     self.updateUI()
 
   def processButtonClicked(self, _):
@@ -198,6 +211,9 @@ class KrocanEvaluator(QDialog, Ui_Evaluator):
         self.fileList.clear()
         for file in self.files:
           self.fileList.addItem("[---] %s" % file)
+      else:
+        self.fileList.clear()
+        self.fileList.addItem("Add files...")
     else:
       if len(self.files) > 0 and len(self.files) % 2 == 0:
         self.processButton.setEnabled(True)
@@ -209,6 +225,9 @@ class KrocanEvaluator(QDialog, Ui_Evaluator):
         for file in self.files:
           self.fileList.addItem("[%s] %s" % ("RAT" if rat else "ROB", file))
           rat = not rat
+      else:
+        self.fileList.clear()
+        self.fileList.addItem("Add files...")
 
 def main():
   app = QApplication(sys.argv)
