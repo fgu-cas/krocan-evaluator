@@ -202,32 +202,21 @@ class KrocanEvaluator(QDialog, Ui_Evaluator):
     message.exec_()
 
   def updateUI(self):
-    if self.singleRadio.isChecked():
-      if len(self.files) > 0:
+    self.fileList.clear()
+    if len(self.files) > 0:
+      if self.singleRadio.isChecked():
         self.processButton.setEnabled(True)
-      else:
-        self.processButton.setEnabled(False)
-      if len(self.files) > 0:
-        self.fileList.clear()
         for file in self.files:
           self.fileList.addItem("[---] %s" % file)
       else:
-        self.fileList.clear()
-        self.fileList.addItem("Add files...")
-    else:
-      if len(self.files) > 0 and len(self.files) % 2 == 0:
-        self.processButton.setEnabled(True)
-      else:
-        self.processButton.setEnabled(False)
-      if len(self.files) > 0:
-        self.fileList.clear()
+        self.processButton.setEnabled(len(self.files) % 2 == 0)
         rat = True
         for file in self.files:
           self.fileList.addItem("[%s] %s" % ("RAT" if rat else "ROB", file))
           rat = not rat
-      else:
-        self.fileList.clear()
-        self.fileList.addItem("Add files...")
+    else:
+      self.processButton.setEnabled(False)
+      self.fileList.addItem("Add files...")
 
 def main():
   app = QApplication(sys.argv)
