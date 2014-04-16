@@ -2,7 +2,7 @@
 import sys, os, csv, re, math
 import matplotlib.pyplot as plt
 from PyQt4.QtGui import QApplication, QDialog, QFileDialog, QMessageBox
-from ui_krocan import Ui_Krocan
+from ui_evaluator import Ui_Evaluator
 
 def processFile(track):
   frames = []
@@ -130,7 +130,7 @@ def renderGraph (frames, params, filename):
 
   plt.savefig(filename)
 
-class KrocanEvaluator(QDialog, Ui_Krocan):
+class KrocanEvaluator(QDialog, Ui_Evaluator):
   
   files = []
 
