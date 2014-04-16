@@ -2,6 +2,7 @@
 import sys, os, csv, re, math
 import matplotlib.pyplot as plt
 from PyQt4.QtGui import QApplication, QDialog, QFileDialog, QMessageBox
+from PyQt4.QtCore import QSettings
 from ui_evaluator import Ui_Evaluator
 
 def processFile(track):
@@ -133,9 +134,11 @@ def renderGraph (frames, params, filename):
 class KrocanEvaluator(QDialog, Ui_Evaluator):
   
   files = []
+  settings = QSettings('FGU AV', 'Evaluator')
 
   def __init__(self):
     QDialog.__init__(self)
+
     self.setupUi(self)
 
     self.addDirButton.clicked.connect(self.addDirButtonClicked)
@@ -148,20 +151,24 @@ class KrocanEvaluator(QDialog, Ui_Evaluator):
     self.show()
 
   def addDirButtonClicked(self, _):
-    directory = QFileDialog.getExistingDirectory(self)
-    logs = [directory+'/'+x for x in os.listdir(directory) if x[-4:] == ".dat"]
-    logs = sorted(logs, key=os.path.getmtime)
-    self.files += logs
-    self.updateUI()
+    directory = QFileDialog.getExistingDirectory(self, "Directory with tracks", self.settings.value("lastLogs"))
+    if directory:
+      self.settings.setValue("lastLogs", directory)
+      logs = [directory+'/'+x for x in os.listdir(directory) if x[-4:] == ".dat"]
+      logs = sorted(logs, key=os.path.getmtime)
+      self.files += logs
+      self.updateUI()
 
   def addButtonClicked(self, _):
-    selected_files = QFileDialog.getOpenFileNames(self, "Open tracks", "", "Logs (*.dat)")
-    row = self.fileList.currentRow()
-    if row is not -1:
-      self.files[row+1:row+1] = selected_files
-    else:
-      self.files += selected_files
-    self.updateUI()
+    selected_files = QFileDialog.getOpenFileNames(self, "Open tracks", self.settings.value("lastLogs"), "Logs (*.dat)")
+    if selected_files:
+      self.settings.setValue("lastLogs", "/".join(selected_files[0].split('/')[:-1]))
+      row = self.fileList.currentRow()
+      if row is not -1:
+        self.files[row+1:row+1] = selected_files
+      else:
+        self.files += selected_files
+      self.updateUI()
 
   def removeButtonClicked(self, _):
     row = self.fileList.currentRow()
@@ -176,7 +183,11 @@ class KrocanEvaluator(QDialog, Ui_Evaluator):
   def processButtonClicked(self, _):
     message = QMessageBox()
     try:
-      output_dir = QFileDialog.getExistingDirectory(self, "Output directory")
+      output_dir = QFileDialog.getExistingDirectory(self, "Output directory", self.settings.value("lastOutput"))
+      if output_dir:
+        self.settings.setValue("lastOutput", output_dir)
+      else:
+        return
       with open(output_dir+'/tracks.csv', 'w') as f:
         writer = csv.writer(f)
         writer.writerow([ "Filename", "Entrances", "Distance", "Maximum Time Avoided", "Time to first entrance", "Shocks", "Time spent in center"])
